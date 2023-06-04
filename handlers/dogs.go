@@ -27,6 +27,18 @@ func getDog(dog string, dogs []models.Dog) (*models.Dog, error) {
 	return nil, fmt.Errorf("could not find dog with name '%v'", dog)
 }
 
+// replaceDog replaces the given dog in the memory, by name
+// Returns an error if the dog is not found
+func replaceDog(dog *models.Dog) error {
+	dogIdx, err := dog.GetArrIdx(dogs)
+	if err != nil {
+		return err
+	}
+
+	dogs[dogIdx] = *dog
+	return nil
+}
+
 // GetDogs reads dogs from the file and inserts them into the memory
 func GetDogs() {
 	data, err := os.ReadFile(dogsFilePath)
@@ -70,4 +82,42 @@ func GetDogHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	}
 
 	io.WriteString(w, "Your chosen dog: "+dog.Name+" whose color is "+dog.Color+" and pack: "+dog.Pack)
+}
+
+// UpdateDogHandler updates the dog with the given name.
+// Returns error if dog is not found
+func UpdateDogHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	type dataChange struct {
+		Name  string `json:"name"`
+		Color string `json:"color"`
+		Pack  string `json:"pack"`
+	}
+	dataToChange := dataChange{}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&dataToChange)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, err.Error())
+		return
+	}
+
+	dog, err := getDog(dataToChange.Name, dogs)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		io.WriteString(w, err.Error())
+		return
+	}
+
+	dog.Name = dataToChange.Name
+	dog.Color = dataToChange.Color
+	dog.Pack = dataToChange.Pack
+
+	err = replaceDog(dog)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Printf("could not read body: %s\n", err)
+	}
+
+	io.WriteString(w, "Dog "+dog.Name+" color changed to "+dog.Color+" and pack to "+dog.Pack)
 }

@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,4 +104,76 @@ func TestGetDogNotFound(t *testing.T) {
 
 	expected := "could not find dog with name 'not-found'"
 	assert.Equal(t, rr.Body.String(), expected)
+}
+
+func TestReplaceDog(t *testing.T) {
+	dogs = []models.Dog{
+		{
+			Animal: models.Animal{
+				Name:  "dog",
+				Color: "black",
+			},
+			Pack: "pack",
+		},
+	}
+	newDog := models.Dog{
+		Animal: models.Animal{
+			Name:  "dog",
+			Color: "red",
+		},
+		Pack: "newPack",
+	}
+
+	err := replaceDog(&newDog)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(dogs), fmt.Sprintf("Wrong amount of dogs stored: got %v want %v", len(dogs), 1))
+
+	assert.Equal(t, newDog.Name, dogs[0].Name)
+	assert.Equal(t, newDog.Color, dogs[0].Color)
+	assert.Equal(t, newDog.Pack, dogs[0].Pack)
+}
+
+func TestUpdateDog(t *testing.T) {
+	dogs = []models.Dog{
+		{
+			Animal: models.Animal{
+				Name:  "dog",
+				Color: "black",
+			},
+			Pack: "pack",
+		},
+	}
+
+	router := httprouter.New()
+	router.POST("/dog/", UpdateDogHandler)
+
+	var jsonData = []byte(`{
+		"name": "dog",
+		"color": "red",
+		"pack": "newPack"
+	}`)
+
+	req, err := http.NewRequest("POST", "/dog/", bytes.NewBuffer(jsonData))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	wantedStatus := http.StatusOK
+	if status := rr.Code; status != wantedStatus {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, wantedStatus)
+	}
+
+	expected := "Dog dog color changed to red and pack to newPack"
+	assert.Equal(t, rr.Body.String(), expected)
+
+	// Verify the data struct was changed
+	expectedDogs := []models.Dog{{Animal: models.Animal{Name: "dog", Color: "red"}, Pack: "newPack"}}
+	ok := utils.CompareDogs(dogs, expectedDogs)
+	assert.True(t, ok, "dog lists differ", dogs, expectedDogs)
 }
