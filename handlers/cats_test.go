@@ -3,6 +3,8 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
@@ -149,5 +151,49 @@ func TestGetCatList(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		runGetCatListTest(t, tc.name, tc.input, tc.expected)
+	}
+}
+
+func copyMap(orig map[string]string) map[string]string {
+	new := map[string]string{}
+	for k, v := range orig {
+		new[k] = v
+	}
+	return new
+}
+
+func TestPostCat(t *testing.T) {
+	originalCats := copyMap(cats)
+	// Defer function is executed when this function exits - no matter for what reason
+	defer func() {
+		cats = originalCats
+	}()
+
+	router := httprouter.New()
+	router.POST("/cat/", PostCatHandler)
+
+	data := url.Values{}
+	data.Set("name", "accident")
+	req, err := http.NewRequest("POST", "/cat/", strings.NewReader(data.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+	wantedStatus := http.StatusOK
+	if status := rr.Code; status != wantedStatus {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, wantedStatus)
+	}
+
+	// Verify the data struct was changed
+	expectedCats := []string{"Alice", "accident", "Bella", "Coco"}
+	actualCats := getCatList(cats)
+	if ok := compareLists(actualCats, expectedCats); !ok {
+		t.Errorf("unexpected cats: got %v want %v",
+			actualCats, expectedCats)
 	}
 }
