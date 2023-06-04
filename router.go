@@ -12,5 +12,7 @@ func createRouter() *httprouter.Router {
 	router.GET("/cat/", handlers.GetCatHandler)
 	router.POST("/cat/", handlers.PostCatHandler)
 	router.HandlerFunc("GET", "/cats", handlers.GetCatsHandler)
+	router.GET("/dog/:name", handlers.GetDogHandler)
+	router.HandlerFunc("GET", "/dogs", handlers.GetDogsHandler)
 	return router
 }
