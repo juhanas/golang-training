@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -14,11 +15,23 @@ var cats = map[string]string{
 	"c": "Coco",
 }
 
+// sortKeys returns a list of the keys in the given map, sorted alphabetically
+func sortKeys(data map[string]string) []string {
+	keys := []string{}
+	for k := range data {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 // getCatList returns a list of all cats
 func getCatList(cats map[string]string) []string {
+	keys := sortKeys(cats)
+
 	catList := []string{}
-	for _, cat := range cats {
-		catList = append(catList, cat)
+	for _, key := range keys {
+		catList = append(catList, cats[key])
 	}
 	return catList
 }
