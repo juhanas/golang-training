@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -52,8 +53,9 @@ func TestGetDogsHandler(t *testing.T) {
 	wantedStatus := http.StatusOK
 	assert.Equal(t, rr.Code, wantedStatus, "handler returned wrong status")
 
-	dogsReceived := rr.Body.String()
-	expected := "[Charlie Buddy Cooper]"
+	dogsReceived := []string{}
+	json.Unmarshal(rr.Body.Bytes(), &dogsReceived)
+	expected := []string{"Charlie", "Buddy", "Cooper"}
 
 	assert.Equal(t, expected, dogsReceived)
 }

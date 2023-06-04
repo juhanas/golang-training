@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,8 +39,9 @@ func GetDogs() {
 
 // GetDogsHandler returns all dogs
 func GetDogsHandler(w http.ResponseWriter, r *http.Request) {
-	// Todo: Return data as json
-	io.WriteString(w, fmt.Sprint(dogs))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dogs)
 }
 
 // GetDogHandler returns details of a single dog requested by name
