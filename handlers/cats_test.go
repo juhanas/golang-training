@@ -9,13 +9,13 @@ import (
 
 	utils "github.com/juhanas/golang-training/utils"
 	"github.com/julienschmidt/httprouter"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCats(t *testing.T) {
 	req, err := http.NewRequest("GET", "/cats", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err, "error creating new request")
 
 	rr := httptest.NewRecorder()
 	// Use golang's net/http handler
@@ -24,16 +24,10 @@ func TestGetCats(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	wantedStatus := http.StatusOK
-	if status := rr.Code; status != wantedStatus {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, wantedStatus)
-	}
+	assert.Equal(t, rr.Code, wantedStatus, "received an unexpected status")
 
 	expected := `[Alice Bella Coco]`
-	if rr.Body.String() != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body.String(), expected)
-	}
+	assert.Equal(t, rr.Body.String(), expected, "received an unexpected response")
 }
 
 func TestGetCat(t *testing.T) {
