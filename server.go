@@ -1,10 +1,11 @@
 package main
 
 import (
-	"os"
-	"fmt"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
+
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -12,11 +13,11 @@ import (
 // The server can be accessed at 127.0.0.1:3333
 func mustRunServer(router *httprouter.Router) {
 	fmt.Println("Starting server at 127.0.0.1:3333")
-	err := 	http.ListenAndServe("127.0.0.1:3333", router)
+	err := http.ListenAndServe("127.0.0.1:3333", router)
 	if errors.Is(err, http.ErrServerClosed) {
-			fmt.Printf("server closed\n")
+		fmt.Printf("server closed\n")
 	} else if err != nil {
-			fmt.Printf("error starting server: %s\n", err)
+		fmt.Printf("error starting server: %s\n", err)
 		os.Exit(1)
 	}
 }
