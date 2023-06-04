@@ -8,22 +8,23 @@ import (
 	"os"
 	"strings"
 
+	"github.com/juhanas/golang-training/models"
 	"github.com/juhanas/golang-training/utils"
 	"github.com/julienschmidt/httprouter"
 )
 
 var dogsFilePath = "./data/dogs.txt"
-var dogs []string
+var dogs []models.Dog
 
 // getDog returns the requested dog
 // Returns an error if the dog is not found
-func getDog(dog string, dogs []string) (string, error) {
+func getDog(dog string, dogs []models.Dog) (*models.Dog, error) {
 	for _, v := range dogs {
-		if strings.Contains(v, dog) {
-			return v, nil
+		if strings.Contains(v.Name, dog) {
+			return &v, nil
 		}
 	}
-	return "", fmt.Errorf("could not find dog with name '%v'", dog)
+	return nil, fmt.Errorf("could not find dog with name '%v'", dog)
 }
 
 // GetDogs reads dogs from the file and inserts them into the memory
@@ -34,7 +35,19 @@ func GetDogs() {
 	}
 	dogNames := utils.ParseCSVDataToArray(data)
 
-	dogs = dogNames
+	dogsMap := []models.Dog{}
+	for _, dogName := range dogNames {
+		dog := models.Dog{
+			Animal: models.Animal{
+				Name:  dogName,
+				Color: "black",
+			},
+			Pack: "Who let the dogs out?",
+		}
+		dogsMap = append(dogsMap, dog)
+	}
+
+	dogs = dogsMap
 }
 
 // GetDogsHandler returns all dogs
@@ -56,5 +69,5 @@ func GetDogHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		return
 	}
 
-	io.WriteString(w, "Your chosen dog: "+dog)
+	io.WriteString(w, "Your chosen dog: "+dog.Name+" whose color is "+dog.Color+" and pack: "+dog.Pack)
 }

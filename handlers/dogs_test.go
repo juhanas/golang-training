@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/juhanas/golang-training/models"
 	utils "github.com/juhanas/golang-training/utils"
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -16,30 +17,30 @@ func TestGetDogs(t *testing.T) {
 	// Allow locating the txt-file when running tests
 	dogsFilePath = "../data/dogs.txt"
 
-	expected := []string{
-		"Charlie",
-		"Buddy",
-		"Cooper",
-		"Duke",
-		"Max",
-		"Rocky",
-		"Stella",
-		"Molly",
-		"Ace",
-		"Milo",
-		"Sadie",
+	expected := []models.Dog{
+		utils.CreateDog("Charlie"),
+		utils.CreateDog("Buddy"),
+		utils.CreateDog("Cooper"),
+		utils.CreateDog("Duke"),
+		utils.CreateDog("Max"),
+		utils.CreateDog("Rocky"),
+		utils.CreateDog("Stella"),
+		utils.CreateDog("Molly"),
+		utils.CreateDog("Ace"),
+		utils.CreateDog("Milo"),
+		utils.CreateDog("Sadie"),
 	}
 
 	GetDogs()
-	ok := utils.CompareLists(dogs, expected)
+	ok := utils.CompareDogs(dogs, expected)
 	require.True(t, ok, "lists do not match", dogs, expected)
 }
 
 func TestGetDogsHandler(t *testing.T) {
-	dogs = []string{
-		"Charlie",
-		"Buddy",
-		"Cooper",
+	dogs = []models.Dog{
+		utils.CreateDog("Charlie"),
+		utils.CreateDog("Buddy"),
+		utils.CreateDog("Cooper"),
 	}
 
 	req, err := http.NewRequest("GET", "/dogs", nil)
@@ -53,18 +54,18 @@ func TestGetDogsHandler(t *testing.T) {
 	wantedStatus := http.StatusOK
 	assert.Equal(t, rr.Code, wantedStatus, "handler returned wrong status")
 
-	dogsReceived := []string{}
+	dogsReceived := []models.Dog{}
 	json.Unmarshal(rr.Body.Bytes(), &dogsReceived)
-	expected := []string{"Charlie", "Buddy", "Cooper"}
 
-	assert.Equal(t, expected, dogsReceived)
+	ok := utils.CompareDogs(dogsReceived, dogs)
+	assert.True(t, ok, "dog lists differ", dogs, dogsReceived)
 }
 
 func TestGetDog(t *testing.T) {
-	dogs = []string{
-		"Charlie",
-		"Buddy",
-		"Cooper",
+	dogs = []models.Dog{
+		utils.CreateDog("Charlie"),
+		utils.CreateDog("Buddy"),
+		utils.CreateDog("Cooper"),
 	}
 
 	router := httprouter.New()
@@ -80,12 +81,12 @@ func TestGetDog(t *testing.T) {
 	wantedStatus := http.StatusOK
 	require.Equal(t, rr.Code, wantedStatus)
 
-	expected := "Your chosen dog: Cooper"
+	expected := "Your chosen dog: Cooper whose color is black and pack: Who let the dogs out?"
 	assert.Equal(t, rr.Body.String(), expected)
 }
 
 func TestGetDogNotFound(t *testing.T) {
-	dogs = []string{}
+	dogs = []models.Dog{}
 
 	router := httprouter.New()
 	router.GET("/dog/:name", GetDogHandler)
