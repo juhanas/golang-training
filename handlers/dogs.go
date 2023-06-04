@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
+	"github.com/juhanas/golang-training/utils"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -25,11 +27,11 @@ func getDog(dog string, dogs []string) (string, error) {
 
 // GetDogs reads dogs from the file and inserts them into the memory
 func GetDogs() {
-	dogNames := []string{
-		"Charlie", "Buddy", "Cooper",
+	data, err := os.ReadFile(dogsFilePath)
+	if err != nil {
+		panic(err)
 	}
-
-	// Todo: Parse names from file
+	dogNames := utils.ParseCSVDataToArray(data)
 
 	dogs = dogNames
 }
