@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	utils "github.com/juhanas/golang-training/utils"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -87,25 +88,9 @@ func TestGetCatNotFound(t *testing.T) {
 	}
 }
 
-// compareLists returns if the two lists contain the same data
-func compareLists(list1, list2 []string) bool {
-	if list1 == nil && list2 != nil || list1 != nil && list2 == nil {
-		return false
-	}
-	if len(list1) != len(list2) {
-		return false
-	}
-	for i := 0; i < len(list1); i++ {
-		if list1[i] != list2[i] {
-			return false
-		}
-	}
-	return true
-}
-
 func runGetCatListTest(t *testing.T, testName string, cats map[string]string, expected []string) {
 	finalCats := getCatList(cats)
-	ok := compareLists(finalCats, expected)
+	ok := utils.CompareLists(finalCats, expected)
 	if !ok {
 		t.Errorf("Unexpected list received for test %s. Want: %v - received: %v", testName, expected, finalCats)
 	}
@@ -154,16 +139,8 @@ func TestGetCatList(t *testing.T) {
 	}
 }
 
-func copyMap(orig map[string]string) map[string]string {
-	new := map[string]string{}
-	for k, v := range orig {
-		new[k] = v
-	}
-	return new
-}
-
 func TestPostCat(t *testing.T) {
-	originalCats := copyMap(cats)
+	originalCats := utils.CopyMap(cats)
 	// Defer function is executed when this function exits - no matter for what reason
 	defer func() {
 		cats = originalCats
@@ -194,7 +171,7 @@ func TestPostCat(t *testing.T) {
 	// Verify the data struct was changed
 	expectedCats := []string{"Alice", "accident", "Bella", "Coco"}
 	actualCats := getCatList(cats)
-	if ok := compareLists(actualCats, expectedCats); !ok {
+	if ok := utils.CompareLists(actualCats, expectedCats); !ok {
 		t.Errorf("unexpected cats: got %v want %v",
 			actualCats, expectedCats)
 	}
