@@ -54,3 +54,24 @@ func GetCatHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 
 	io.WriteString(w, "Your chosen cat: "+cat)
 }
+
+// findNameKey returns the key for the given name
+// Returns error if name is reserved or key could not be found
+func findNameKey(name string, dict map[string]string, i int) string {
+	key := name[:i]
+	_, ok := dict[key]
+	if !ok {
+		return key
+	}
+	return findNameKey(name, dict, i+1)
+}
+
+// PostCatHandler adds a new cat
+func PostCatHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.ParseForm()
+	name := r.Form["name"][0]
+	key := findNameKey(name, cats, 1)
+	cats[key] = name
+
+	w.WriteHeader(http.StatusOK)
+}

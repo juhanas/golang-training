@@ -10,6 +10,7 @@ func createRouter() *httprouter.Router {
 	router := httprouter.New()
 	router.HandlerFunc("GET", "/", handlers.GetRootHandler)
 	router.GET("/cat/", handlers.GetCatHandler)
+	router.POST("/cat/", handlers.PostCatHandler)
 	router.HandlerFunc("GET", "/cats", handlers.GetCatsHandler)
 	return router
 }

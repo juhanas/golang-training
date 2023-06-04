@@ -11,3 +11,5 @@ This repository contains example code for learning Golang.
 1. Start the server with `go run .`
 2. Make GET request to `127.0.0.1:3333/` to see the API
     - Use for example `curl http://localhost:3333`
+3. To make POST requests you can use the following command
+    - `curl -d "name=accident" -X POST http://127.0.0.1:3333/cat/`
