@@ -174,7 +174,9 @@ func TestPostCat(t *testing.T) {
 
 	data := url.Values{}
 	data.Set("name", "accident")
-	req, err := http.NewRequest("POST", "/cat/", strings.NewReader(data.Encode()))
+	body := strings.NewReader(data.Encode())
+
+	req, err := http.NewRequest("POST", "/cat/", body)
 	if err != nil {
 		t.Fatal(err)
 	}
