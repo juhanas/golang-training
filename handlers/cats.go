@@ -17,6 +17,9 @@ var cats = map[string]string{
 // getCatList returns a list of all cats
 func getCatList(cats map[string]string) []string {
 	catList := []string{}
+	for _, cat := range cats {
+		catList = append(catList, cat)
+	}
 	return catList
 }
 
